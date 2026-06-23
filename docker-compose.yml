@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: reading-diary-app-db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - reading-diary-app-network
+volumes:
+  postgres_data:
+    name: reading-diary-app-postgres-data
+
+networks:
+  reading-diary-app-network:
+    name: reading-diary-app-network
+    driver: bridge
