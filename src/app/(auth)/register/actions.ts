@@ -22,7 +22,6 @@ export async function registerAction(
     });
 
     const { email, name, password } = validatedFields;
-    console.log(validatedFields);
 
     const existingUser = await prisma.user.findUnique({ where: { email } });
 

@@ -1,9 +1,10 @@
+import { auth } from "@/shared/lib/auth";
 import { BookOpen, LogOut, User } from "lucide-react";
 import Link from "next/link";
+import { logoutAction } from "../actions";
 
-export const Header = () => {
-  const isAuthenticated = false;
-  const user = {};
+export async function Header() {
+  const session = await auth();
 
   return (
     <header className="bg-white shadow-sm">
@@ -19,7 +20,7 @@ export const Header = () => {
           </div>
 
           <nav className="flex items-center space-x-4">
-            {isAuthenticated ? (
+            {session ? (
               <>
                 <Link
                   href="/books"
@@ -36,12 +37,12 @@ export const Header = () => {
                 <div className="flex items-center space-x-2 ml-4">
                   <User className="h-5 w-5 text-gray-500" />
                   <span className="text-sm text-gray-700">
-                    {user?.username}
+                    {session.user?.name}
                   </span>
                 </div>
                 <button
-                  onClick={() => {}}
-                  className="text-gray-700 hover:text-red-600"
+                  onClick={logoutAction}
+                  className="text-gray-700 hover:text-red-600 cursor-pointer"
                 >
                   <LogOut className="h-5 w-5" />
                 </button>
@@ -67,4 +68,4 @@ export const Header = () => {
       </div>
     </header>
   );
-};
+}

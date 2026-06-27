@@ -1,8 +1,9 @@
+import { auth } from "@/shared/lib/auth";
 import { BookOpen, Library, PenTool } from "lucide-react";
 import Link from "next/link";
 
-export default function Home() {
-  const isAuthenticated = false;
+export default async function Home() {
+  const session = await auth();
 
   return (
     <div className="text-center">
@@ -44,7 +45,7 @@ export default function Home() {
       </div>
 
       <div className="space-x-4">
-        {isAuthenticated ? (
+        {session ? (
           <Link
             href="/books"
             className="bg-indigo-600 text-white px-8 py-3 rounded-md text-lg font-medium hover:bg-indigo-700"
