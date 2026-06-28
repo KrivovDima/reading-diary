@@ -5,6 +5,7 @@ import { loginSchema } from "./lib/validations";
 import { signIn } from "@/shared/lib/auth";
 import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
+import { getZodErrorMessages } from "@/shared/utils";
 
 export type LoginActionState =
   | {
@@ -29,9 +30,7 @@ export async function loginAction(
       return { error: "Invalid credentials" };
     }
     if (error instanceof z.ZodError) {
-      const errorMessages = JSON.parse(error.message) as { message: string }[];
-
-      return { error: errorMessages.map(({ message }) => message).join(". ") };
+      return { error: getZodErrorMessages(error) };
     }
 
     return { error: "Something went wrong" };

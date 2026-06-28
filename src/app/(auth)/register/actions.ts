@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
 import { LOGIN_URL } from "./lib/constants";
 import z from "zod";
+import { getZodErrorMessages } from "@/shared/utils";
 
 export type RegisterAction = { error?: string };
 
@@ -36,8 +37,7 @@ export async function registerAction(
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const errorMessages = JSON.parse(error.message) as { message: string }[];
-      return { error: errorMessages.map(({ message }) => message).join(". ") };
+      return { error: getZodErrorMessages(error) };
     }
 
     return { error: "Something went wrong" };
