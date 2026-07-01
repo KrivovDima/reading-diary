@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const addBookShema = z.object({
+export const bookFormShema = z.object({
   title: z.string().min(1, "Title is required"),
   author: z.string().min(1, "Author is requires"),
   coverUrl: z.url("Invalid URL").optional().or(z.literal("")),

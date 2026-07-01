@@ -1,23 +1,44 @@
 "use client";
 
 import { useActionState } from "react";
-import { addBookAction, AddBookActionState } from "../actions";
+import z from "zod";
+import { bookFormShema } from "../lib/validations";
+import { useForm } from "react-hook-form";
+import Image from "next/image";
+import { Book } from "@/generated/prisma/client";
 
-export function BookForm() {
-  const [state, action] = useActionState<AddBookActionState, FormData>(
-    addBookAction,
-    undefined,
+type State = { error?: string } | undefined;
+type BookFormProps<T extends State> = {
+  action: (state: Awaited<T>, formData: FormData) => Promise<T> | T;
+  initialActionState: Awaited<T>;
+  initialFormState?: Book;
+};
+
+export function BookForm<T extends State>({
+  action,
+  initialActionState,
+  initialFormState,
+}: BookFormProps<T>) {
+  const [state, formAction] = useActionState<T, FormData>(
+    action,
+    initialActionState,
   );
 
+  const { watch, register } = useForm<Book>({
+    defaultValues: initialFormState,
+  });
+
+  const coverUrl = watch("coverUrl");
+
   return (
-    <form action={action} className="space-y-6 max-w-2xl">
+    <form action={formAction} className="space-y-6 max-w-2xl">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Title *
           </label>
           <input
-            name="title"
+            {...register("title")}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
@@ -27,7 +48,7 @@ export function BookForm() {
             Author *
           </label>
           <input
-            name="author"
+            {...register("author")}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
@@ -37,10 +58,20 @@ export function BookForm() {
             Cover URL
           </label>
           <input
-            name="coverUrl"
+            {...register("coverUrl")}
             placeholder="https://example.com/cover.jpg"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
+          {coverUrl && (
+            <Image
+              src={coverUrl}
+              alt="Cover preview"
+              className="mt-2 h-32 w-24 object-cover rounded-md"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = "none";
+              }}
+            />
+          )}
         </div>
 
         <div>
@@ -49,7 +80,7 @@ export function BookForm() {
           </label>
           <input
             type="number"
-            name="totalPages"
+            {...register("totalPages")}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
@@ -60,7 +91,7 @@ export function BookForm() {
           </label>
           <input
             type="number"
-            name="currentPage"
+            {...register("currentPage")}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
@@ -70,7 +101,7 @@ export function BookForm() {
             Status
           </label>
           <select
-            name="status"
+            {...register("status")}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             <option value="PLANNED">Planned</option>
@@ -89,7 +120,7 @@ export function BookForm() {
             min="0"
             max="5"
             step="0.5"
-            name="rating"
+            {...register("rating")}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
@@ -100,7 +131,7 @@ export function BookForm() {
           </label>
           <input
             type="date"
-            name="startDate"
+            {...register("startDate")}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
@@ -111,7 +142,7 @@ export function BookForm() {
           </label>
           <input
             type="date"
-            name="endDate"
+            {...register("endDate")}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
@@ -121,7 +152,7 @@ export function BookForm() {
             Review
           </label>
           <textarea
-            name="review"
+            {...register("review")}
             rows={4}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
