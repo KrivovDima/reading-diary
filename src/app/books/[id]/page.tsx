@@ -1,7 +1,7 @@
 import { auth } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/db";
 import { notFound, redirect } from "next/navigation";
-import { BookDetail } from "./ui/book-detail";
+import { BookDetail } from "./_ui/book-detail";
 
 type BookProps = {
   params: Promise<{ id: string }>;
