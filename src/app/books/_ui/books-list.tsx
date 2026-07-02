@@ -4,9 +4,10 @@ import { Book } from "@/generated/prisma/client";
 import { Search } from "lucide-react";
 import { useState } from "react";
 import { BookCard } from "./book-card";
+import { SerializedBook } from "@/entities/book";
 
 type BooksListProps = {
-  books: Book[];
+  books: Array<SerializedBook>;
 };
 
 export const BooksList = ({ books }: BooksListProps) => {
@@ -51,7 +52,7 @@ export const BooksList = ({ books }: BooksListProps) => {
 
       {filteredBooks && filteredBooks.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredBooks.map((book: Book) => (
+          {filteredBooks.map((book) => (
             <BookCard key={book.id} book={book} />
           ))}
         </div>

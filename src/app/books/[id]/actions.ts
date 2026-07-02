@@ -1,11 +1,12 @@
 "use server";
 
+import { Book } from "@/generated/prisma/client";
 import { auth } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/db";
 import { getZodErrorMessages } from "@/shared/utils";
 import { getBookFormValidatedFields } from "@/widgets/book-form";
 import { revalidatePath } from "next/cache";
-import { error } from "node:console";
+import { redirect } from "next/navigation";
 import z from "zod";
 
 export async function updateBookAction(bookId: string, formData: FormData) {
@@ -38,13 +39,22 @@ export async function updateBookAction(bookId: string, formData: FormData) {
       startDate,
     } = validatedFields;
 
+    const getIsCompletedBook = () => {
+      if (currentPage === totalPages) {
+        return {
+          status: "COMPLETED",
+          endDate: new Date().toISOString(),
+        } as const;
+      }
+    };
+
     await prisma.book.update({
       where: { id: book.id },
       data: {
         author,
         currentPage,
         status:
-          (status ?? currentPage === totalPages) ? "COMPLETED" : undefined,
+          status ?? (currentPage === totalPages ? "COMPLETED" : undefined),
         title,
         totalPages,
         coverUrl,
@@ -52,6 +62,7 @@ export async function updateBookAction(bookId: string, formData: FormData) {
         rating,
         review,
         startDate,
+        ...getIsCompletedBook(),
       },
     });
 
@@ -64,4 +75,22 @@ export async function updateBookAction(bookId: string, formData: FormData) {
 
     return { error: "Failed to update book" };
   }
+}
+
+export async function deleteBookAction(id: string) {
+  const session = await auth();
+
+  if (!session?.user) {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    await prisma.book.delete({ where: { id, userId: session.user.id } });
+  } catch (error) {
+    return { error: "Faled to delete book" };
+  }
+
+  revalidatePath("/books");
+  revalidatePath(`/books/${id}`);
+  redirect("/books");
 }

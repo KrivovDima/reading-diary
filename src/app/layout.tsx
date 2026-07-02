@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Roboto, Roboto_Mono } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/widgets/header";
+import { Toaster } from "react-hot-toast";
 
 const robotoSans = Roboto({
   variable: "--font-roboto-sans",
@@ -35,6 +36,7 @@ export default function RootLayout({
             {children}
           </main>
         </div>
+        <Toaster position="top-right" />
       </body>
     </html>
   );

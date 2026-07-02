@@ -6,7 +6,8 @@ import { format } from "date-fns";
 import { Edit2, Plus, Star, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { updateBookAction } from "../actions";
+import { deleteBookAction, updateBookAction } from "../actions";
+import toast from "react-hot-toast";
 
 type UpdateBookActionState = { error?: string } | undefined;
 type BookDetailProps = {
@@ -49,6 +50,16 @@ export const BookDetail = ({
     return data;
   };
 
+  const handleDeleteBook = async () => {
+    if (!confirm("Are you sure you want to delete this book?")) return;
+
+    const result = await deleteBookAction(id);
+
+    if (result.error) {
+      toast.error(result.error);
+    }
+  };
+
   if (isEditing) {
     return (
       <div>
@@ -80,7 +91,7 @@ export const BookDetail = ({
             <Edit2 className="h-5 w-5" />
           </button>
           <button
-            onClick={() => {}}
+            onClick={handleDeleteBook}
             className="p-2 text-gray-600 hover:text-red-600"
           >
             <Trash2 className="h-5 w-5" />
@@ -91,7 +102,7 @@ export const BookDetail = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div>
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            {coverUrl ? (
+            {false ? (
               <Image
                 src={coverUrl}
                 alt={title}

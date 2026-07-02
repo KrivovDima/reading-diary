@@ -2,6 +2,7 @@ import { auth } from "@/shared/lib/auth";
 import { BooksList } from "./_ui/books-list";
 import { redirect } from "next/navigation";
 import { prisma } from "@/shared/lib/db";
+import { getSerializedBook } from "@/entities/book";
 
 export default async function Books() {
   const session = await auth();
@@ -14,10 +15,7 @@ export default async function Books() {
     where: { userId: session.user.id },
     orderBy: { updatedAt: "desc" },
   });
-  const serializedBooks = books.map((book) => ({
-    ...book,
-    rating: book.rating?.toString(),
-  }));
+  const serializedBooks = books.map(getSerializedBook);
 
   return (
     <div>

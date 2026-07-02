@@ -1,5 +1,6 @@
 "use client";
 
+import { SerializedBook } from "@/entities/book";
 import { Book } from "@/generated/prisma/client";
 import { format } from "date-fns";
 import { BookOpen, Calendar, Star } from "lucide-react";
@@ -7,7 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 type BookCardProps = {
-  book: Book;
+  book: SerializedBook;
 };
 
 export const BookCard = ({
@@ -37,11 +38,9 @@ export const BookCard = ({
     <Link href={`/books/${id}`}>
       <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
         <div className="relative h-48 bg-gray-200">
-          {coverUrl ? (
+          {false ? (
             <Image
-              // TODO:
-              // src={coverUrl}
-              src={""}
+              src={coverUrl}
               alt={title}
               className="w-full h-full object-cover"
               width={100}

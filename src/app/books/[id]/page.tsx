@@ -2,6 +2,7 @@ import { auth } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/db";
 import { notFound, redirect } from "next/navigation";
 import { BookDetail } from "./_ui/book-detail";
+import { getSerializedBook } from "@/entities/book";
 
 type BookProps = {
   params: Promise<{ id: string }>;
@@ -24,5 +25,5 @@ export default async function Book({ params }: BookProps) {
     notFound();
   }
 
-  return <BookDetail book={book} />;
+  return <BookDetail book={getSerializedBook(book)} />;
 }
