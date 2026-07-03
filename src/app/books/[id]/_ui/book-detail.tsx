@@ -6,7 +6,11 @@ import { format } from "date-fns";
 import { Edit2, Plus, Star, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { deleteBookAction, updateBookAction } from "../actions";
+import {
+  deleteBookAction,
+  updateBookAction,
+  updateCurrentPageAction,
+} from "../actions";
 import toast from "react-hot-toast";
 
 type UpdateBookActionState = { error?: string } | undefined;
@@ -56,6 +60,14 @@ export const BookDetail = ({
     const result = await deleteBookAction(id);
 
     if (result.error) {
+      toast.error(result.error);
+    }
+  };
+
+  const handleUpdateCurrentPage = async (page: number) => {
+    const result = await updateCurrentPageAction({ page, bookId: id });
+
+    if (result?.error) {
       toast.error(result.error);
     }
   };
@@ -151,13 +163,20 @@ export const BookDetail = ({
               {status === "READING" && (
                 <div className="space-x-2">
                   <button
-                    onClick={() => {}}
+                    disabled={currentPage === 0}
+                    onClick={() => {
+                      handleUpdateCurrentPage(Math.max(0, currentPage - 1));
+                    }}
                     className="px-3 py-1 border rounded-md hover:bg-gray-50"
                   >
                     -1
                   </button>
                   <button
-                    onClick={() => {}}
+                    onClick={() => {
+                      handleUpdateCurrentPage(
+                        Math.min(totalPages, currentPage + 1),
+                      );
+                    }}
                     className="px-3 py-1 border rounded-md hover:bg-gray-50"
                   >
                     +1

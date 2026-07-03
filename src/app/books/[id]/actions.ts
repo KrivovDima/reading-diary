@@ -94,3 +94,45 @@ export async function deleteBookAction(id: string) {
   revalidatePath(`/books/${id}`);
   redirect("/books");
 }
+
+export async function updateCurrentPageAction({
+  bookId,
+  page,
+}: {
+  page: number;
+  bookId: string;
+}) {
+  const session = await auth();
+
+  if (!session?.user) {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const userId = session.user.id;
+    const book = await prisma.book.findUnique({
+      where: { id: bookId, userId },
+    });
+
+    if (!book) {
+      return { error: "Book not found" };
+    }
+
+    if (page < 0 || page > book.totalPages) {
+      return { error: "Not valid current page" };
+    }
+
+    await prisma.book.update({
+      where: { id: bookId, userId },
+      data: {
+        currentPage: page,
+        status: page === book.totalPages ? "COMPLETED" : undefined,
+      },
+    });
+  } catch (error) {
+    return { error: "Faled to update current page" };
+  }
+
+  revalidatePath(`books/${bookId}`);
+  revalidatePath("books");
+}
