@@ -5,8 +5,10 @@ import { BookForm } from "@/widgets/book-form";
 import { format } from "date-fns";
 import { Edit2, Plus, Star, Trash2 } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useActionState, useState } from "react";
 import {
+  addNoteAction,
+  AddNoteActionState,
   deleteBookAction,
   updateBookAction,
   updateCurrentPageAction,
@@ -37,8 +39,26 @@ export const BookDetail = ({
 }: BookDetailProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [showNoteForm, setShowNoteForm] = useState(false);
-  const [noteContent, setNoteContent] = useState("");
-  const [notePage, setNotePage] = useState<number | undefined>(undefined);
+
+  const handleAddNote = async (
+    _prevState: AddNoteActionState,
+    formData: FormData,
+  ) => {
+    const result = await addNoteAction(formData, id);
+
+    if (result?.error) {
+      toast.error(result.error);
+    }
+
+    setShowNoteForm(false);
+
+    return result;
+  };
+
+  const [, addNote] = useActionState<AddNoteActionState, FormData>(
+    handleAddNote,
+    undefined,
+  );
 
   const progress =
     totalPages > 0 ? Math.round((currentPage / totalPages) * 100) : 0;
@@ -218,25 +238,22 @@ export const BookDetail = ({
             </div>
 
             {showNoteForm && (
-              <div className="mb-6 p-4 border rounded-md">
+              <form action={addNote} className="mb-6 p-4 border rounded-md">
                 <textarea
-                  value={noteContent}
-                  onChange={(e) => setNoteContent(e.target.value)}
+                  name="noteContent"
                   placeholder="Write your note..."
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-2"
+                  required
                 />
                 <div className="flex items-center justify-between">
                   <input
+                    name="notePage"
                     type="number"
-                    value={notePage || ""}
-                    onChange={(e) =>
-                      setNotePage(
-                        e.target.value ? Number(e.target.value) : undefined,
-                      )
-                    }
                     placeholder="Page number (optional)"
                     className="w-40 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    max={totalPages}
+                    min={1}
                   />
                   <div className="space-x-2">
                     <button
@@ -246,14 +263,14 @@ export const BookDetail = ({
                       Cancel
                     </button>
                     <button
-                      onClick={() => {}}
+                      type="submit"
                       className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
                     >
                       Add
                     </button>
                   </div>
                 </div>
-              </div>
+              </form>
             )}
 
             {notes && notes.length > 0 ? (

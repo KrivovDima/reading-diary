@@ -7,7 +7,9 @@ import { getZodErrorMessages } from "@/shared/utils";
 import { getBookFormValidatedFields } from "@/widgets/book-form";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { error } from "node:console";
 import z from "zod";
+import { noteSchema } from "./lib/validations";
 
 export async function updateBookAction(bookId: string, formData: FormData) {
   try {
@@ -135,4 +137,40 @@ export async function updateCurrentPageAction({
 
   revalidatePath(`books/${bookId}`);
   revalidatePath("books");
+}
+
+export type AddNoteActionState = { error?: string } | undefined;
+export async function addNoteAction(formData: FormData, bookId: string) {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { error: "Unauthorize" };
+  }
+
+  try {
+    const validatedFields = noteSchema.parse({
+      content: formData.get("noteContent"),
+      page: Number(formData.get("notePage")) || undefined,
+    });
+    const { content, page } = validatedFields;
+
+    const userId = session.user.id;
+    const book = await prisma.book.findUnique({
+      where: { id: bookId, userId },
+    });
+
+    if (!book) {
+      return { error: "Not fount book" };
+    }
+
+    await prisma.note.create({ data: { content, page, bookId, userId } });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { error: getZodErrorMessages(error) };
+    }
+
+    return { error: "Faled to add note" };
+  }
+
+  revalidatePath(`books/${bookId}`);
 }

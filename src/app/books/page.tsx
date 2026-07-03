@@ -1,5 +1,5 @@
 import { auth } from "@/shared/lib/auth";
-import { BooksList } from "./_ui/books-list";
+import { BooksList } from "./ui/books-list";
 import { redirect } from "next/navigation";
 import { prisma } from "@/shared/lib/db";
 import { getSerializedBook } from "@/entities/book";
