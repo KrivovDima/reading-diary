@@ -38,13 +38,11 @@ export const BookCard = ({
     <Link href={`/books/${id}`}>
       <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
         <div className="relative h-48 bg-gray-200">
-          {false ? (
-            <Image
+          {coverUrl ? (
+            <img
               src={coverUrl}
               alt={title}
               className="w-full h-full object-cover"
-              width={100}
-              height={100}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
