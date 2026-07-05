@@ -3,6 +3,7 @@ import { prisma } from "@/shared/lib/db";
 import { notFound, redirect } from "next/navigation";
 import { BookDetail } from "./ui/book-detail";
 import { getSerializedBook } from "@/entities/book";
+import { Prisma } from "@/generated/prisma/client";
 
 type BookProps = {
   params: Promise<{ id: string }>;
