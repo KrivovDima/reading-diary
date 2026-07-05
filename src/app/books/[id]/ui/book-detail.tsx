@@ -126,6 +126,7 @@ export const BookDetail = ({
         <h2 className="text-3xl font-bold">{title}</h2>
         <div className="flex space-x-2">
           <button
+            type={"button"}
             onClick={() => setIsEditing(true)}
             className="p-2 text-gray-600 hover:text-indigo-600"
           >
