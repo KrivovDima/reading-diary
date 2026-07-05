@@ -143,11 +143,11 @@ export const BookDetail = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div>
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            {false ? (
-              <Image
+            {coverUrl ? (
+              <img
                 src={coverUrl}
                 alt={title}
-                className="w-full h-64 object-cover"
+                className="w-full h-64 object-contain"
               />
             ) : (
               <div className="w-full h-64 bg-gray-200 flex items-center justify-center">

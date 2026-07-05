@@ -7,7 +7,6 @@ export const getBookFormValidatedFields = (formData: FormData) => {
   const validatedFields = bookFormShema.parse({
     title: formData.get("title"),
     author: formData.get("author"),
-    coverUrl: formData.get("coverUrl") || undefined,
     totalPages: Number(formData.get("totalPages")),
     currentPage: Number(formData.get("currentPage")) || undefined,
     status: formData.get("status"),

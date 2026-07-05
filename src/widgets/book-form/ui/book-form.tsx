@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { ChangeEventHandler, useActionState, useState } from "react";
 import z from "zod";
 import { bookFormShema } from "../lib/validations";
 import { useForm } from "react-hook-form";
@@ -24,11 +24,26 @@ export function BookForm<T extends State>({
     initialActionState,
   );
 
-  const { watch, register } = useForm<Book>({
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+
+  const { register } = useForm<Book>({
     defaultValues: initialFormState,
   });
 
-  const coverUrl = watch("coverUrl");
+  const handleFileChange: ChangeEventHandler<
+    HTMLInputElement,
+    HTMLInputElement
+  > = async (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => setCoverPreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
 
   return (
     <form action={formAction} className="space-y-6 max-w-2xl">
@@ -55,18 +70,22 @@ export function BookForm<T extends State>({
 
         <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Cover URL
+            Cover
           </label>
           <input
-            {...register("coverUrl")}
-            placeholder="https://example.com/cover.jpg"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            type="file"
+            accept="image/*"
+            name="cover"
+            onChange={handleFileChange}
           />
-          {coverUrl && (
+          {coverPreview && (
             <Image
-              src={coverUrl}
+              src={coverPreview}
               alt="Cover preview"
               className="mt-2 h-32 w-24 object-cover rounded-md"
+              height={128}
+              width={96}
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = "none";
               }}

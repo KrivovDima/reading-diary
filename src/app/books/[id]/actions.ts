@@ -10,6 +10,7 @@ import { redirect } from "next/navigation";
 import { error } from "node:console";
 import z from "zod";
 import { noteSchema } from "./lib/validations";
+import { uploadBookCover } from "@/features/uploadBookCover";
 
 export async function updateBookAction(bookId: string, formData: FormData) {
   try {
@@ -34,12 +35,14 @@ export async function updateBookAction(bookId: string, formData: FormData) {
       status,
       title,
       totalPages,
-      coverUrl,
       endDate,
       rating,
       review,
       startDate,
     } = validatedFields;
+
+    const file = formData.get("cover") as File | undefined;
+    const coverUrl = file ? await uploadBookCover(file) : undefined;
 
     const getIsCompletedBook = () => {
       if (currentPage === totalPages) {

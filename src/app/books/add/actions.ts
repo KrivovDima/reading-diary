@@ -7,6 +7,7 @@ import z from "zod";
 import { redirect } from "next/navigation";
 import { getZodErrorMessages } from "@/shared/utils";
 import { getBookFormValidatedFields } from "@/widgets/book-form";
+import { uploadBookCover } from "@/features/uploadBookCover";
 
 export type AddBookActionState = { error?: string } | undefined;
 
@@ -31,18 +32,20 @@ export async function addBookAction(
       status,
       title,
       totalPages,
-      coverUrl,
       endDate,
       rating,
       review,
       startDate,
     } = validatedFields;
 
+    const file = formData.get("cover") as File | undefined;
+    const coverUrl = file ? await uploadBookCover(file) : undefined;
+
     const book = await prisma.book.create({
       data: {
         title,
         author,
-        coverUrl: coverUrl || undefined,
+        coverUrl: coverUrl ?? undefined,
         totalPages,
         currentPage,
         status,
