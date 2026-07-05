@@ -174,3 +174,26 @@ export async function addNoteAction(formData: FormData, bookId: string) {
 
   revalidatePath(`books/${bookId}`);
 }
+
+export async function deleteNoteAction({
+  bookId,
+  noteId,
+}: {
+  noteId: string;
+  bookId: string;
+}) {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { error: "Unauthorize" };
+  }
+
+  try {
+    await prisma.note.delete({
+      where: { id: noteId, userId: session.user.id },
+    });
+  } catch (error) {
+    return { error: "Faled to delete note" };
+  }
+  revalidatePath(`books/${bookId}`);
+}

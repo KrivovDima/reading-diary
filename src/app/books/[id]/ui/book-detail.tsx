@@ -10,6 +10,7 @@ import {
   addNoteAction,
   AddNoteActionState,
   deleteBookAction,
+  deleteNoteAction,
   updateBookAction,
   updateCurrentPageAction,
 } from "../actions";
@@ -86,6 +87,14 @@ export const BookDetail = ({
 
   const handleUpdateCurrentPage = async (page: number) => {
     const result = await updateCurrentPageAction({ page, bookId: id });
+
+    if (result?.error) {
+      toast.error(result.error);
+    }
+  };
+
+  const handleDeleteNote = async (noteId: string) => {
+    const result = await deleteNoteAction({ bookId: id, noteId });
 
     if (result?.error) {
       toast.error(result.error);
@@ -293,7 +302,7 @@ export const BookDetail = ({
                         </div>
                       </div>
                       <button
-                        onClick={() => {}}
+                        onClick={() => handleDeleteNote(note.id)}
                         className="text-red-400 hover:text-red-600"
                       >
                         <Trash2 className="h-4 w-4" />
