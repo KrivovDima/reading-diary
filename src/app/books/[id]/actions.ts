@@ -1,13 +1,11 @@
 "use server";
 
-import { Book } from "@/generated/prisma/client";
 import { auth } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/db";
 import { getZodErrorMessages } from "@/shared/utils";
 import { getBookFormValidatedFields } from "@/widgets/book-form";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { error } from "node:console";
 import z from "zod";
 import { noteSchema } from "./lib/validations";
 import { uploadBookCover } from "@/features/uploadBookCover";
@@ -29,23 +27,12 @@ export async function updateBookAction(bookId: string, formData: FormData) {
     }
 
     const validatedFields = getBookFormValidatedFields(formData);
-    const {
-      author,
-      currentPage,
-      status,
-      title,
-      totalPages,
-      endDate,
-      rating,
-      review,
-      startDate,
-    } = validatedFields;
 
     const file = formData.get("cover") as File | undefined;
     const coverUrl = file ? await uploadBookCover(file) : undefined;
 
     const getIsCompletedBook = () => {
-      if (currentPage === totalPages) {
+      if (validatedFields.currentPage === validatedFields.totalPages) {
         return {
           status: "COMPLETED",
           endDate: new Date().toISOString(),
@@ -56,17 +43,8 @@ export async function updateBookAction(bookId: string, formData: FormData) {
     await prisma.book.update({
       where: { id: book.id },
       data: {
-        author,
-        currentPage,
-        status:
-          status ?? (currentPage === totalPages ? "COMPLETED" : undefined),
-        title,
-        totalPages,
-        coverUrl,
-        endDate,
-        rating,
-        review,
-        startDate,
+        ...validatedFields,
+        ...(coverUrl && { coverUrl }),
         ...getIsCompletedBook(),
       },
     });
