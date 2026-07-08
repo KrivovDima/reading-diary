@@ -4,7 +4,6 @@ import { prisma } from "@/shared/lib/db";
 import { registerShema } from "./lib/validations";
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
-import { LOGIN_URL } from "./lib/constants";
 import z from "zod";
 import { getZodErrorMessages } from "@/shared/utils";
 
@@ -43,5 +42,5 @@ export async function registerAction(
     return { error: "Something went wrong" };
   }
 
-  redirect(LOGIN_URL);
+  redirect("/login");
 }
