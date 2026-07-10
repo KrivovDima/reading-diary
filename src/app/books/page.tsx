@@ -17,12 +17,5 @@ export default async function Books() {
   });
   const serializedBooks = books.map(getSerializedBook);
 
-  return (
-    <div>
-      <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-bold">My Books</h2>
-      </div>
-      <BooksList books={serializedBooks} />
-    </div>
-  );
+  return <BooksList books={serializedBooks} />;
 }
