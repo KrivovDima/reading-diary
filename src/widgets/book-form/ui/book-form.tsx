@@ -1,23 +1,33 @@
 "use client";
 
 import { ChangeEventHandler, useActionState, useState } from "react";
-import z from "zod";
-import { bookFormShema } from "../lib/validations";
 import { useForm } from "react-hook-form";
-import Image from "next/image";
 import { Book } from "@/generated/prisma/client";
+import {
+  X,
+  BookOpen,
+  Upload,
+  User,
+  Calendar,
+  Bookmark,
+  FileText,
+  PlusCircle,
+  Hash,
+} from "lucide-react";
 
 type State = { error?: string } | undefined;
 type BookFormProps<T extends State> = {
   action: (state: Awaited<T>, formData: FormData) => Promise<T> | T;
   initialActionState: Awaited<T>;
   initialFormState?: Book;
+  onCancel?: () => void;
 };
 
 export function BookForm<T extends State>({
   action,
   initialActionState,
   initialFormState,
+  onCancel,
 }: BookFormProps<T>) {
   const [state, formAction] = useActionState<T, FormData>(
     action,
@@ -46,150 +56,170 @@ export function BookForm<T extends State>({
   };
 
   return (
-    <form action={formAction} className="space-y-6 max-w-2xl">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="glass-morphism rounded-3xl p-6 sm:p-8">
+      <form action={formAction} className="space-y-6">
+        {/* Загрузка обложки */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Title *
+          <label className="block text-sm font-medium text-gray-700 mb-3">
+            Обложка книги
           </label>
-          <input
-            {...register("title")}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
+          <div className="flex items-center gap-4">
+            {coverPreview ? (
+              <div className="relative">
+                <img
+                  src={coverPreview}
+                  alt="Preview"
+                  className="w-24 h-32 object-cover rounded-xl"
+                />
+                <button
+                  type="button"
+                  onClick={() => {}}
+                  className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="w-24 h-32 bg-gray-100 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-300">
+                <BookOpen className="w-8 h-8 text-gray-400" />
+              </div>
+            )}
+            <label className="cursor-pointer">
+              <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-sm font-medium text-gray-700">
+                <Upload className="w-4 h-4" />
+                {coverPreview ? "Изменить" : "Загрузить"}
+              </div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+                name="cover"
+              />
+            </label>
+          </div>
         </div>
 
+        {/* Название */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Author *
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Название книги *
           </label>
-          <input
-            {...register("author")}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
-
-        <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Cover
-          </label>
-          <input
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            type="file"
-            accept="image/*"
-            name="cover"
-            onChange={handleFileChange}
-          />
-          {coverPreview && (
-            <Image
-              src={coverPreview}
-              alt="Cover preview"
-              className="mt-2 h-32 w-24 object-cover rounded-md"
-              height={128}
-              width={96}
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = "none";
-              }}
+          <div className="relative">
+            <BookOpen className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              className="input-field pl-12"
+              placeholder="Введите название"
+              required
+              {...register("title")}
             />
-          )}
+          </div>
         </div>
 
+        {/* Автор */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Total Pages *
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Автор *
           </label>
-          <input
-            type="number"
-            {...register("totalPages")}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              className="input-field pl-12"
+              placeholder="Имя автора"
+              required
+              {...register("author")}
+            />
+          </div>
         </div>
 
+        {/* Жанр и год */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <Hash className="w-4 h-4 inline mr-1" />
+              Жанр
+            </label>
+            <select className="input-field">
+              <option value="">Выберите жанр</option>
+              <option value="fiction">Художественная литература</option>
+              <option value="non-fiction">Нон-фикшн</option>
+              <option value="science">Научная</option>
+              <option value="fantasy">Фэнтези</option>
+              <option value="mystery">Детектив</option>
+              <option value="biography">Биография</option>
+              <option value="history">История</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <Calendar className="w-4 h-4 inline mr-1" />
+              Год издания
+            </label>
+            <input type="number" className="input-field" placeholder="2024" />
+          </div>
+        </div>
+
+        {/* Страницы и статус */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <BookOpen className="w-4 h-4 inline mr-1" />
+              Количество страниц
+            </label>
+            <input
+              type="number"
+              className="input-field"
+              placeholder="0"
+              {...register("totalPages")}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <Bookmark className="w-4 h-4 inline mr-1" />
+              Статус
+            </label>
+            <select {...register("status")} className="input-field">
+              <option value="PLANNED">В планах</option>
+              <option value="READING">Читаю</option>
+              <option value="COMPLETED">Прочитано</option>
+              <option value="DROPPED">Брошено</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Описание */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Current Page
-          </label>
-          <input
-            type="number"
-            {...register("currentPage")}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Status
-          </label>
-          <select
-            {...register("status")}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="PLANNED">Planned</option>
-            <option value="READING">Reading</option>
-            <option value="COMPLETED">Completed</option>
-            <option value="DROPPED">Dropped</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Rating (0-5)
-          </label>
-          <input
-            type="number"
-            min="0"
-            max="5"
-            step="0.5"
-            {...register("rating")}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Start Date
-          </label>
-          <input
-            type="date"
-            {...register("startDate")}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            End Date
-          </label>
-          <input
-            type="date"
-            {...register("endDate")}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
-
-        <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Review
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            <FileText className="w-4 h-4 inline mr-1" />
+            Описание
           </label>
           <textarea
-            {...register("review")}
-            rows={4}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="input-field min-h-[150px] resize-y"
+            placeholder="Краткое описание книги..."
           />
         </div>
-      </div>
 
-      {state?.error && (
-        <div className="text-red-600 text-sm text-center">{state.error}</div>
-      )}
+        {state?.error && (
+          <div className="text-red-600 text-sm text-center">{state.error}</div>
+        )}
 
-      <div className="flex justify-end space-x-4">
-        <button
-          type="submit"
-          className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 disabled:opacity-50"
-        >
-          Save Book
-        </button>
-      </div>
-    </form>
+        {/* Кнопки */}
+        <div className="flex flex-col sm:flex-row gap-4 pt-4">
+          <button type="submit" className="btn-primary">
+            Сохранить
+          </button>
+          <button
+            type="button"
+            className="px-6 py-3 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
+            onClick={onCancel}
+          >
+            <X className="w-4 h-4" />
+            Отмена
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }
